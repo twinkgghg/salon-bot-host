@@ -1,0 +1,66 @@
+# Бесплатный хостинг: готовый архив
+
+> Основной вариант — **Bothost**, файлы в `deploy/bothost/`, инструкция
+> `docs/10-bothost.md`. Ниже — вариант для PythonAnywhere.
+
+В папке лежит `salon-bot-hosting.zip` — только файлы бота, без токена, базы
+и лишних папок.
+
+## Что нужно сделать
+
+1. Зарегистрироваться на https://www.pythonanywhere.com
+   (**Create a Beginner account**, карта не нужна).
+2. Запомнить username — он будет в адресе `USERNAME.pythonanywhere.com`.
+3. Загрузить `salon-bot-hosting.zip` через **Files → Upload a file**.
+4. В **Consoles → Bash** выполнить:
+
+```bash
+unzip salon-bot-hosting.zip -d salon-bot
+```
+
+5. Создать `.env` в папке `salon-bot` (Files → New file) и вписать токен,
+   `OWNER_ID`, данные салона и `WEBHOOK_SECRET`. **Без** `TELEGRAM_API_IP`.
+6. **Web → Add a new web app → Manual configuration → Python 3.10+**.
+   - Source code: `/home/USERNAME/salon-bot`
+   - Working directory: `/home/USERNAME/salon-bot`
+   - В WSGI-файле:
+
+```python
+import sys
+
+path = "/home/USERNAME/salon-bot"
+if path not in sys.path:
+    sys.path.insert(0, path)
+
+from wsgi import application
+```
+
+7. Нажать **Reload**.
+8. Открыть `https://USERNAME.pythonanywhere.com` — должно быть
+   `salon-bot is running`.
+9. В Bash-консоли:
+
+```bash
+cd ~/salon-bot
+python3 bot.py set-webhook https://USERNAME.pythonanywhere.com
+python3 bot.py info
+```
+
+10. **Остановить локальный бот** на компьютере: одновременно `poll` и вебхук
+    работать не должны.
+
+Подробная инструкция с частыми ошибками: `docs/02-hosting.md`.
+
+## Что проверить
+
+- [ ] Сайт открывается и отдаёт `salon-bot is running`.
+- [ ] `python3 bot.py info` показывает вебхук и `В очереди: 0`.
+- [ ] В Telegram бот отвечает на `/start`.
+- [ ] Заявка доходит до админа.
+- [ ] Список команд виден в кнопке «Меню».
+- [ ] Старые сообщения удаляются.
+
+## Если Telegram недоступен с хостинга
+
+Напиши в поддержку PythonAnywhere: иногда `api.telegram.org` нужно добавить
+в белый список. Если не помогут — нужен другой бесплатный хостинг или VPS.
